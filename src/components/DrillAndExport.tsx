@@ -6,6 +6,7 @@ import {
 } from '../core/blueprintCard';
 import type { AccountTier, PatternSpec, SiteEntry } from '../core/types';
 import { weavePassword } from '../core/weaver';
+import type { ThemeMode } from '../hooks/useTheme';
 import { useI18n } from '../i18n/I18nContext';
 import { TokenAnatomy } from './TokenAnatomy';
 import { TactileInput } from './ui/TactileInput';
@@ -17,6 +18,7 @@ interface DrillAndExportProps {
   tierOverrides: Record<string, AccountTier>;
   bestStreak: number;
   onRecordBestStreak: (streak: number) => void;
+  theme: ThemeMode;
 }
 
 export function DrillAndExport({
@@ -25,6 +27,7 @@ export function DrillAndExport({
   tierOverrides,
   bestStreak,
   onRecordBestStreak,
+  theme,
 }: DrillAndExportProps) {
   const { locale, t } = useI18n();
   const [targetIndex, setTargetIndex] = useState<number>(0);
@@ -46,9 +49,9 @@ export function DrillAndExport({
 
   useEffect(() => {
     if (canvasRef.current) {
-      drawZeroSecretBlueprintCanvas(canvasRef.current, spec, locale);
+      drawZeroSecretBlueprintCanvas(canvasRef.current, spec, locale, theme);
     }
-  }, [spec, locale]);
+  }, [spec, locale, theme]);
 
   const selectSiteIndex = (idx: number) => {
     setTargetIndex(idx);
@@ -255,13 +258,13 @@ export function DrillAndExport({
         )}
       </div>
 
-      {/* Right: Metallic Visual Reference Card */}
+      {/* Right: Visual Reference Card */}
       <div className="surface-card rounded-2xl border border-zinc-200/90 p-6 sm:p-7 lg:col-span-7 dark:border-zinc-800">
         <div className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
           {t.save.cardTitle}
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-lg">
+        <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-lg">
           <canvas ref={canvasRef} className="block h-auto w-full" />
         </div>
 

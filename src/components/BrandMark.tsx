@@ -11,14 +11,21 @@ export function BrandMark({ className = 'w-8 h-8' }: BrandMarkProps) {
       aria-hidden="true"
       className={className}
     >
-      <rect x="2" y="2" width="60" height="60" rx="14" fill="#09090B" />
+      <rect
+        x="2"
+        y="2"
+        width="60"
+        height="60"
+        rx="14"
+        className="fill-zinc-900 dark:fill-zinc-950"
+      />
       <rect
         x="2.75"
         y="2.75"
         width="58.5"
         height="58.5"
         rx="13.25"
-        stroke="#27272A"
+        className="stroke-black/10 dark:stroke-zinc-800"
         strokeWidth="1.5"
       />
       <g strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round">

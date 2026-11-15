@@ -88,6 +88,7 @@ function PassWeaveWorkspace() {
             tierOverrides={store.tierOverrides}
             bestStreak={store.bestStreak}
             onRecordBestStreak={store.recordBestStreak}
+            theme={theme}
           />
         )}
       </main>

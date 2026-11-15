@@ -126,7 +126,9 @@ export function drawZeroSecretBlueprintCanvas(
   canvas: HTMLCanvasElement,
   spec: PatternSpec,
   locale: 'zh' | 'en',
+  theme: 'light' | 'dark' = 'dark',
 ): void {
+  const isDark = theme === 'dark';
   const scale = 2;
   const width = 820;
   const height = 460;
@@ -141,21 +143,26 @@ export function drawZeroSecretBlueprintCanvas(
   const sans = `-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif`;
   const mono = `"JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace`;
 
-  // Rich metallic dark background with subtle radial teal glow
+  // Theme-adaptive surface background
   const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-  bgGrad.addColorStop(0, '#131419');
-  bgGrad.addColorStop(1, '#09090C');
+  if (isDark) {
+    bgGrad.addColorStop(0, '#131419');
+    bgGrad.addColorStop(1, '#09090C');
+  } else {
+    bgGrad.addColorStop(0, '#FFFFFF');
+    bgGrad.addColorStop(1, '#F8FAFC');
+  }
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
   const glow = ctx.createRadialGradient(width - 120, 80, 10, width - 120, 80, 260);
-  glow.addColorStop(0, 'rgba(20, 184, 166, 0.14)');
+  glow.addColorStop(0, isDark ? 'rgba(20, 184, 166, 0.14)' : 'rgba(20, 184, 166, 0.09)');
   glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, width, height);
 
   // Subtle dot grid
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(15, 23, 42, 0.06)';
   for (let gx = 28; gx < width - 20; gx += 24) {
     for (let gy = 28; gy < height - 20; gy += 24) {
       ctx.beginPath();
@@ -170,9 +177,6 @@ export function drawZeroSecretBlueprintCanvas(
   roundRect(ctx, 0, 0, 38, 38, 10);
   ctx.fillStyle = '#09090B';
   ctx.fill();
-  ctx.strokeStyle = '#27272A';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
 
   ctx.strokeStyle = '#F4F4F5';
   ctx.lineWidth = 2.6;
@@ -197,7 +201,7 @@ export function drawZeroSecretBlueprintCanvas(
   ctx.stroke();
   ctx.restore();
 
-  ctx.fillStyle = '#FAFAFA';
+  ctx.fillStyle = isDark ? '#FAFAFA' : '#09090B';
   ctx.font = `600 22px ${sans}`;
   ctx.fillText(locale === 'zh' ? 'PassWeave 规律卡' : 'PassWeave Rule Card', 100, 62);
 
@@ -214,21 +218,31 @@ export function drawZeroSecretBlueprintCanvas(
 
     roundRect(ctx, chipX, chipY, boxW, boxH, 12);
     if (chip.tone === 'teal') {
-      ctx.fillStyle = 'rgba(20, 184, 166, 0.14)';
-      ctx.strokeStyle = 'rgba(45, 212, 191, 0.42)';
+      ctx.fillStyle = isDark ? 'rgba(20, 184, 166, 0.14)' : 'rgba(20, 184, 166, 0.10)';
+      ctx.strokeStyle = isDark ? 'rgba(45, 212, 191, 0.42)' : 'rgba(13, 148, 136, 0.35)';
     } else if (chip.tone === 'amber') {
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
-      ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+      ctx.fillStyle = isDark ? 'rgba(245, 158, 11, 0.16)' : 'rgba(245, 158, 11, 0.12)';
+      ctx.strokeStyle = isDark ? 'rgba(251, 191, 36, 0.45)' : 'rgba(217, 119, 6, 0.38)';
     } else {
-      ctx.fillStyle = 'rgba(63, 63, 70, 0.45)';
-      ctx.strokeStyle = 'rgba(113, 113, 122, 0.45)';
+      ctx.fillStyle = isDark ? 'rgba(63, 63, 70, 0.45)' : '#F4F4F5';
+      ctx.strokeStyle = isDark ? 'rgba(113, 113, 122, 0.45)' : '#D4D4D8';
     }
     ctx.lineWidth = 1.5;
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle =
-      chip.tone === 'teal' ? '#99F6E4' : chip.tone === 'amber' ? '#FDE68A' : '#D4D4D8';
+      chip.tone === 'teal'
+        ? isDark
+          ? '#99F6E4'
+          : '#115E59'
+        : chip.tone === 'amber'
+          ? isDark
+            ? '#FDE68A'
+            : '#92400E'
+          : isDark
+            ? '#D4D4D8'
+            : '#3F3F46';
     ctx.textAlign = 'center';
     ctx.fillText(chip.text, chipX + boxW / 2, chipY + 36);
     ctx.textAlign = 'left';
@@ -274,24 +288,24 @@ export function drawZeroSecretBlueprintCanvas(
 
   let y = 216;
   for (const [label, value] of items) {
-    ctx.fillStyle = '#71717A';
+    ctx.fillStyle = isDark ? '#71717A' : '#64748B';
     ctx.font = `500 16px ${sans}`;
     ctx.fillText(label, 48, y);
 
-    ctx.fillStyle = '#F4F4F5';
+    ctx.fillStyle = isDark ? '#F4F4F5' : '#09090B';
     ctx.font = `500 17px ${sans}`;
     ctx.fillText(value, 168, y);
     y += 50;
   }
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15, 23, 42, 0.08)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(48, 376);
   ctx.lineTo(width - 48, 376);
   ctx.stroke();
 
-  ctx.fillStyle = '#A1A1AA';
+  ctx.fillStyle = isDark ? '#A1A1AA' : '#71717A';
   ctx.font = `400 15px ${sans}`;
   ctx.fillText(
     locale === 'zh'

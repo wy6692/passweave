@@ -87,7 +87,7 @@ export function BreachCascade({
       {/* Cause -> Effect Cards with Brand Avatars */}
       <div className="grid items-stretch gap-6 md:grid-cols-12">
         {/* Left: Breach Source */}
-        <div className="surface-card flex flex-col justify-between rounded-2xl border border-amber-500/35 p-6 md:col-span-5 dark:border-amber-400/25">
+        <div className="surface-card flex flex-col justify-between rounded-2xl border border-zinc-200/90 p-6 md:col-span-5 dark:border-zinc-800">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <SiteAvatar domainCore={forum.domainCore} size="md" />

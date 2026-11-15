@@ -29,14 +29,17 @@ function hashPalette(str: string): string {
   return CUSTOM_PALETTES[h % CUSTOM_PALETTES.length]!;
 }
 
+const RIM_COLORED = 'ring-1 ring-inset ring-black/[0.08] dark:ring-white/[0.14]';
+const RIM_WHITE = 'ring-1 ring-inset ring-zinc-900/10 dark:ring-white/20';
+
 export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
   const uid = useId();
   const key = domainCore.toLowerCase();
-  const box = `${SIZE_MAP[size]} flex shrink-0 items-center justify-center shadow-xs`;
+  const box = `${SIZE_MAP[size]} flex shrink-0 items-center justify-center shadow-2xs`;
 
   if (key === 'github') {
     return (
-      <div className={`${box} border border-white/15 bg-[#181717] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#181717] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[62%] w-[62%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.github} />
         </svg>
@@ -46,7 +49,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'wechat') {
     return (
-      <div className={`${box} border border-white/20 bg-[#07C160] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#07C160] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[62%] w-[62%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.wechat} />
         </svg>
@@ -56,7 +59,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'taobao') {
     return (
-      <div className={`${box} border border-white/20 bg-gradient-to-b from-[#FF6A00] to-[#FF5000] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-gradient-to-b from-[#FF6A00] to-[#FF5000] text-white`}>
         <svg
           viewBox="64 64 896 896"
           fill="currentColor"
@@ -71,7 +74,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'alipay') {
     return (
-      <div className={`${box} border border-white/20 bg-[#1677FF] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#1677FF] text-white`}>
         <svg
           viewBox="64 64 896 896"
           fill="currentColor"
@@ -87,7 +90,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'bilibili') {
     return (
-      <div className={`${box} border border-white/20 bg-[#00A1D6] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#00A1D6] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[60%] w-[60%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.bilibili} />
         </svg>
@@ -99,7 +102,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
     const gradId = `steam-grad-${uid}`;
     const clipId = `steam-clip-${uid}`;
     return (
-      <div className={`${box} border border-white/15 bg-[#111D2E]`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#111D2E]`}>
         <svg viewBox="0 0 24 24" className="h-[74%] w-[74%]" aria-hidden="true">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
@@ -122,7 +125,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === '163') {
     return (
-      <div className={`${box} border border-white/20 bg-[#D43C33] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#D43C33] text-white`}>
         <svg
           viewBox="3 2.5 18 19"
           fill="currentColor"
@@ -138,7 +141,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'google') {
     return (
-      <div className={`${box} border border-zinc-200/90 bg-white dark:border-white/20`}>
+      <div className={`${box} ${RIM_WHITE} bg-white`}>
         <svg viewBox="0 0 256 262" className="h-[56%] w-[56%]" aria-hidden="true">
           {BRAND_ICONS.google.map((seg, idx) => (
             <path key={idx} fill={seg.fill} d={seg.d} />
@@ -150,7 +153,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'microsoft') {
     return (
-      <div className={`${box} border border-zinc-200/90 bg-white dark:border-white/20`}>
+      <div className={`${box} ${RIM_WHITE} bg-white`}>
         <svg viewBox="0 0 256 256" className="h-[52%] w-[52%]" aria-hidden="true">
           {BRAND_ICONS.microsoft.map((seg, idx) => (
             <path key={idx} fill={seg.fill} d={seg.d} />
@@ -162,7 +165,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'zhihu') {
     return (
-      <div className={`${box} border border-white/20 bg-[#0066FF] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#0066FF] text-white`}>
         <svg
           viewBox="64 64 896 896"
           fill="currentColor"
@@ -177,7 +180,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'xiaohongshu') {
     return (
-      <div className={`${box} border border-white/20 bg-[#FF2442] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#FF2442] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[74%] w-[74%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.xiaohongshu} />
         </svg>
@@ -187,7 +190,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'weibo') {
     return (
-      <div className={`${box} border border-white/20 bg-[#E6162D] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#E6162D] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[62%] w-[62%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.weibo} />
         </svg>
@@ -197,7 +200,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'qq') {
     return (
-      <div className={`${box} border border-white/20 bg-[#12B7F5] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#12B7F5] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[60%] w-[60%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.qq} />
         </svg>
@@ -207,7 +210,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'baidu') {
     return (
-      <div className={`${box} border border-white/20 bg-[#2932E1] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#2932E1] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[60%] w-[60%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.baidu} />
         </svg>
@@ -217,7 +220,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'douban') {
     return (
-      <div className={`${box} border border-white/20 bg-[#00B51D] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#00B51D] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[56%] w-[56%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.douban} />
         </svg>
@@ -227,7 +230,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'douyin') {
     return (
-      <div className={`${box} border border-white/15 bg-[#09090B]`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#09090B]`}>
         <svg viewBox="-1 -1 26 26" className="h-[60%] w-[60%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.douyin} fill="#25F4EE" transform="translate(-0.75, -0.65)" />
           <path d={BRAND_ICONS.si.douyin} fill="#FE2C55" transform="translate(0.75, 0.65)" />
@@ -239,7 +242,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'meituan') {
     return (
-      <div className={`${box} border border-amber-500/30 bg-[#FFD100] text-[#111111]`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#FFD100] text-[#111111]`}>
         <svg
           viewBox="2 6 20 12"
           fill="currentColor"
@@ -254,7 +257,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'apple') {
     return (
-      <div className={`${box} border border-white/15 bg-[#18181B] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#18181B] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[58%] w-[58%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.apple} />
         </svg>
@@ -264,7 +267,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'notion') {
     return (
-      <div className={`${box} border border-zinc-200/90 bg-white text-[#111111] dark:border-white/20`}>
+      <div className={`${box} ${RIM_WHITE} bg-white text-[#111111]`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[60%] w-[60%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.notion} />
         </svg>
@@ -274,7 +277,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'discord') {
     return (
-      <div className={`${box} border border-white/20 bg-[#5865F2] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#5865F2] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[62%] w-[62%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.discord} />
         </svg>
@@ -284,7 +287,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'x') {
     return (
-      <div className={`${box} border border-white/15 bg-[#09090B] text-white`}>
+      <div className={`${box} ${RIM_COLORED} bg-[#09090B] text-white`}>
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-[52%] w-[52%]" aria-hidden="true">
           <path d={BRAND_ICONS.si.x} />
         </svg>
@@ -294,19 +297,13 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
 
   if (key === 'indiemod') {
     return (
-      <div className={`${box} border border-amber-500/30 bg-gradient-to-b from-zinc-800 to-zinc-900 text-amber-400`}>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-[56%] w-[56%]"
-          aria-hidden="true"
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          <path d="M8 9h8M8 13h5" />
+      <div
+        className={`${box} ${RIM_COLORED} bg-gradient-to-b from-[#8B5CF6] to-[#6D28D9] text-white`}
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-[62%] w-[62%]" aria-hidden="true">
+          <path d="M12 2.4 20.4 7.2 12 12 3.6 7.2Z" />
+          <path d="M2.8 8.6 11.2 13.4v8.2L2.8 16.8Z" fillOpacity="0.82" />
+          <path d="M21.2 8.6v8.2l-8.4 4.8v-8.2Z" fillOpacity="0.64" />
         </svg>
       </div>
     );
@@ -315,7 +312,7 @@ export function SiteAvatar({ domainCore, size = 'sm' }: SiteAvatarProps) {
   const monogram = (domainCore.slice(0, 2) || 'PW').toUpperCase();
   return (
     <div
-      className={`${box} border border-white/20 bg-gradient-to-br font-mono text-xs font-bold ${hashPalette(key)}`}
+      className={`${box} ${RIM_COLORED} bg-gradient-to-br font-mono text-xs font-bold ${hashPalette(key)}`}
     >
       {monogram}
     </div>
