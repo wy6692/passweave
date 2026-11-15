@@ -9,7 +9,7 @@ Before submitting a pull request, please keep these repository invariants in min
 1. **Zero Network I/O**: Do not introduce external runtime requests (remote fonts, CDN assets, analytics scripts, or API calls). Production builds must continue passing the `connect-src 'none'` CSP verification step in CI.
 2. **Minimal Runtime Dependencies**: Keep `dependencies` in `package.json` lean so security reviewers can audit the dependency tree quickly.
 3. **Human Computability**: Any new site-token transform added to `src/core/transforms.ts` must remain mentally computable by a human in under 4 seconds without paper or a calculator, and must define deterministic behavior for short (`x.com`) and numeric (`163.com`) domains.
-4. **No Persistent Secret Storage**: Never persist `PatternSpec` anchor strings to browser storage or URL hashes.
+4. **Local-Only Workspace State**: Workspace settings may only be persisted in local browser storage (`localStorage`) with a clear in-app reset action, and must never be transmitted over the network or serialized into URL query parameters or hashes.
 
 ## Local Workflow
 

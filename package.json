@@ -2,21 +2,30 @@
   "name": "passweave",
   "version": "0.1.0",
   "private": false,
-  "description": "Zero-network workbench for designing human-computable, breach-isolated password patterns.",
+  "description": "Offline-first workbench for designing human-computable, breach-isolated password patterns.",
   "keywords": [
     "password",
     "security",
-    "mnemonic",
+    "password-generator",
     "credential-stuffing",
+    "mnemonic",
     "privacy",
-    "offline-first"
+    "offline-first",
+    "zero-trust",
+    "react",
+    "typescript",
+    "tailwindcss"
   ],
-  "license": "MIT",
-  "type": "module",
+  "homepage": "https://wy6692.github.io/passweave/",
+  "bugs": {
+    "url": "https://github.com/wy6692/passweave/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wy66692/passweave.git"
+    "url": "git+https://github.com/wy6692/passweave.git"
   },
+  "license": "MIT",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
