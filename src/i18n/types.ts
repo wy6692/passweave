@@ -33,10 +33,16 @@ export interface Messages {
     };
     copy: string;
     copied: string;
+    maskHide: string;
+    maskShow: string;
     fixedWord: string;
     delimiters: string;
     tailDigits: string;
     shuffleExample: string;
+    resetBtn: string;
+    resetConfirm: string;
+    removeSite: string;
+    nextCheck: string;
     namingLabel: string;
     namingDomain: string;
     namingPinyin: string;
@@ -65,6 +71,7 @@ export interface Messages {
   check: {
     leakCompareTitle: string;
     checklistTitle: string;
+    nextSave: string;
     items: {
       noLiteral: { pass: string; warn: string; fix: string };
       formatOk: { pass: string; warn: string; fix: string };
@@ -77,13 +84,16 @@ export interface Messages {
     inputPlaceholder: string;
     checkBtn: string;
     nextBtn: string;
+    skipBtn: string;
     hintBtn: string;
     hideHintBtn: string;
     correct: string;
     wrong: string;
     streak: string;
+    bestStreak: string;
     cardTitle: string;
     downloadPng: string;
+    savedPng: string;
     copyText: string;
     copiedText: string;
   };

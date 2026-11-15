@@ -1,15 +1,17 @@
 import { Moon, Sun } from 'lucide-react';
+import type { WorkspaceStageId } from '../core/storage';
 import type { ThemeMode } from '../hooks/useTheme';
 import { useI18n } from '../i18n/I18nContext';
 import { BrandMark } from './BrandMark';
 
-export type StageId = 'why' | 'design' | 'check' | 'save';
+export type StageId = WorkspaceStageId;
 
 interface TopBarProps {
   activeStage: StageId;
   onSelectStage: (stage: StageId) => void;
   theme: ThemeMode;
   onToggleTheme: () => void;
+  checkSummary: { passed: number; total: number; hasIssue: boolean };
 }
 
 export function TopBar({
@@ -17,8 +19,10 @@ export function TopBar({
   onSelectStage,
   theme,
   onToggleTheme,
+  checkSummary,
 }: TopBarProps) {
   const { locale, toggleLocale, t } = useI18n();
+  const allPassed = checkSummary.passed === checkSummary.total;
 
   const stages: Array<{ id: StageId; label: string }> = [
     { id: 'why', label: t.nav.why },
@@ -52,13 +56,26 @@ export function TopBar({
                 key={stage.id}
                 type="button"
                 onClick={() => onSelectStage(stage.id)}
-                className={`cursor-pointer rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${
+                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${
                   active
                     ? 'bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50'
                     : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
                 }`}
               >
-                {stage.label}
+                <span>{stage.label}</span>
+                {stage.id === 'check' && (
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 font-mono text-xs font-semibold ${
+                      allPassed
+                        ? 'bg-teal-500/14 text-teal-700 dark:bg-teal-400/16 dark:text-teal-300'
+                        : checkSummary.hasIssue
+                          ? 'bg-amber-500/18 text-amber-800 dark:bg-amber-400/20 dark:text-amber-300'
+                          : 'bg-zinc-200/80 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                    }`}
+                  >
+                    {checkSummary.passed}/{checkSummary.total}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -94,13 +111,16 @@ export function TopBar({
                 key={stage.id}
                 type="button"
                 onClick={() => onSelectStage(stage.id)}
-                className={`cursor-pointer rounded-lg py-1.5 text-center text-sm font-medium ${
+                className={`inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg py-1.5 text-center text-sm font-medium ${
                   active
                     ? 'bg-white text-zinc-950 shadow-2xs dark:bg-zinc-800 dark:text-zinc-50'
                     : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >
-                {stage.label}
+                <span>{stage.label}</span>
+                {stage.id === 'check' && checkSummary.hasIssue && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                )}
               </button>
             );
           })}

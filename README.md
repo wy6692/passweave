@@ -23,7 +23,7 @@ PassWeave helps you design a consistent, memorable password rule so every site g
 - Whenever a device supports a password manager (Bitwarden, 1Password, KeePassXC) with randomly generated secrets and Passkeys/2FA, prefer a password manager.
 - PassWeave is meant for vault master passwords, shared or restricted machines where extensions cannot be installed, and helping people move away from password reuse.
 - A human-computable rule is not a cryptographic hash function. If multiple everyday passwords leak in plaintext, a motivated analyst could eventually infer the rule—which is why throwaway sites must stay isolated and critical accounts must use a separate base word with 2FA.
-- Production builds enforce `Content-Security-Policy: connect-src 'none'`. Inputs stay in memory only, and exported reference cards omit your base words.
+- Production builds enforce `Content-Security-Policy: connect-src 'none'`. Workspace settings stay strictly in local browser storage (with one-click reset), and exported reference cards omit your base words.
 
 ## Development
 

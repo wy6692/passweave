@@ -1,7 +1,7 @@
 import { ArrowRight, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import { BUILTIN_SITES } from '../core/sites';
-import type { PatternSpec } from '../core/types';
+import type { AccountTier, PatternSpec, SiteEntry } from '../core/types';
 import { weavePassword } from '../core/weaver';
 import { useI18n } from '../i18n/I18nContext';
 import { BreachTopologyIllustration } from './visuals/BreachTopologyIllustration';
@@ -11,27 +11,38 @@ type ModeKey = 'reuse' | 'suffix' | 'weave';
 
 interface BreachCascadeProps {
   spec: PatternSpec;
+  sites: SiteEntry[];
+  tierOverrides: Record<string, AccountTier>;
   onProceed: () => void;
 }
 
-export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
+export function BreachCascade({
+  spec,
+  sites,
+  tierOverrides,
+  onProceed,
+}: BreachCascadeProps) {
   const { locale, t } = useI18n();
   const [mode, setMode] = useState<ModeKey>('reuse');
 
-  const forum = BUILTIN_SITES.find((s) => s.id === 'forum-decoy')!;
-  const targets = [
-    BUILTIN_SITES.find((s) => s.id === 'github')!,
-    BUILTIN_SITES.find((s) => s.id === 'wechat')!,
-    BUILTIN_SITES.find((s) => s.id === 'taobao')!,
-    BUILTIN_SITES.find((s) => s.id === 'google')!,
-    BUILTIN_SITES.find((s) => s.id === 'alipay')!,
-  ];
+  const throwawayCandidates = sites.filter(
+    (s) => (tierOverrides[s.id] ?? s.defaultTier) === 'tier3',
+  );
+  const forum =
+    throwawayCandidates[0] ?? BUILTIN_SITES.find((s) => s.id === 'forum-decoy')!;
+
+  const nonThrowaway = sites.filter(
+    (s) => (tierOverrides[s.id] ?? s.defaultTier) !== 'tier3',
+  );
+  const targets = nonThrowaway.slice(0, 5);
+
+  const demoBase = spec.tier2.head.trim() || 'Cedar';
 
   const leakedPassword =
     mode === 'reuse'
-      ? 'Cedar2026!'
+      ? `${demoBase}2026!`
       : mode === 'suffix'
-        ? `Cedar_${forum.domainCore}`
+        ? `${demoBase}_${forum.domainCore}`
         : weavePassword(spec, forum, 'tier3').password;
 
   const hintText =
@@ -85,7 +96,7 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
                   {t.why.breachBoxTitle}
                 </div>
                 <div className="font-mono text-sm text-zinc-500 dark:text-zinc-400">
-                  {t.why.breachSite}
+                  {forum.url}
                 </div>
               </div>
             </div>
@@ -114,12 +125,13 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
           <div className="divide-y divide-zinc-200/70 dark:divide-zinc-800/80">
             {targets.map((site) => {
               const name = locale === 'zh' ? site.nameZh : site.nameEn;
+              const tier = tierOverrides[site.id] ?? site.defaultTier;
               const password =
                 mode === 'reuse'
-                  ? 'Cedar2026!'
+                  ? `${demoBase}2026!`
                   : mode === 'suffix'
-                    ? `Cedar_${site.domainCore}`
-                    : weavePassword(spec, site).password;
+                    ? `${demoBase}_${site.domainCore}`
+                    : weavePassword(spec, site, tier).password;
 
               const safe = mode === 'weave';
               const statusLabel =

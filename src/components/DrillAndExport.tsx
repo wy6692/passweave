@@ -15,18 +15,30 @@ interface DrillAndExportProps {
   spec: PatternSpec;
   sites: SiteEntry[];
   tierOverrides: Record<string, AccountTier>;
+  bestStreak: number;
+  onRecordBestStreak: (streak: number) => void;
 }
 
-export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportProps) {
+export function DrillAndExport({
+  spec,
+  sites,
+  tierOverrides,
+  bestStreak,
+  onRecordBestStreak,
+}: DrillAndExportProps) {
   const { locale, t } = useI18n();
   const [targetIndex, setTargetIndex] = useState<number>(0);
   const [answer, setAnswer] = useState<string>('');
   const [showHint, setShowHint] = useState<boolean>(false);
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  const [showWrongGuide, setShowWrongGuide] = useState<boolean>(false);
   const [streak, setStreak] = useState<number>(0);
+  const [masteredIds, setMasteredIds] = useState<Set<string>>(() => new Set());
   const [copiedText, setCopiedText] = useState<boolean>(false);
+  const [savedPng, setSavedPng] = useState<boolean>(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const currentSite = sites[targetIndex % sites.length] ?? sites[0]!;
   const currentTier = tierOverrides[currentSite.id] ?? currentSite.defaultTier;
@@ -38,27 +50,43 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
     }
   }, [spec, locale]);
 
-  const nextTarget = () => {
-    setTargetIndex((prev) => (prev + 1) % sites.length);
+  const selectSiteIndex = (idx: number) => {
+    setTargetIndex(idx);
     setAnswer('');
     setStatus('idle');
+    setShowWrongGuide(false);
     setShowHint(false);
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const nextTarget = () => {
+    selectSiteIndex((targetIndex + 1) % sites.length);
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (status !== 'idle') {
+    if (status === 'correct') {
       nextTarget();
       return;
     }
     if (!answer.trim()) return;
 
     if (answer.trim() === expected.password) {
+      const nextStreak = streak + 1;
       setStatus('correct');
-      setStreak((prev) => prev + 1);
+      setShowWrongGuide(false);
+      setStreak(nextStreak);
+      onRecordBestStreak(nextStreak);
+      setMasteredIds((prev) => {
+        const next = new Set(prev);
+        next.add(currentSite.id);
+        return next;
+      });
     } else {
       setStatus('wrong');
+      setShowWrongGuide(true);
       setStreak(0);
+      inputRef.current?.select();
     }
   };
 
@@ -69,6 +97,8 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
     link.href = canvas.toDataURL('image/png');
     link.download = `passweave-card-${locale}.png`;
     link.click();
+    setSavedPng(true);
+    window.setTimeout(() => setSavedPng(false), 1600);
   };
 
   const handleCopyText = async () => {
@@ -91,10 +121,12 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
             {t.save.practiceTitle}
           </span>
 
-          <div className="flex items-center gap-3">
-            {streak > 0 && (
-              <span className="rounded-lg bg-teal-500/12 px-2.5 py-0.5 font-mono text-sm font-medium text-teal-800 dark:text-teal-300">
-                {t.save.streak} {streak}
+          <div className="flex items-center gap-2.5">
+            {(streak > 0 || bestStreak > 0) && (
+              <span className="rounded-lg bg-teal-500/12 px-2.5 py-0.5 font-mono text-xs font-medium text-teal-800 dark:text-teal-300">
+                {streak > 0
+                  ? `${t.save.streak} ${streak}`
+                  : `${t.save.bestStreak} ${bestStreak}`}
               </span>
             )}
             {currentTier !== 'tier3' && (
@@ -109,7 +141,35 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col items-center rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-6 text-center dark:border-zinc-800 dark:bg-zinc-950/60">
+        {/* Clickable Site Avatar Picker Strip */}
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1.5">
+          {sites.map((site, idx) => {
+            const active = idx === targetIndex % sites.length;
+            const done = masteredIds.has(site.id);
+            return (
+              <button
+                key={site.id}
+                type="button"
+                onClick={() => selectSiteIndex(idx)}
+                title={locale === 'zh' ? site.nameZh : site.nameEn}
+                className={`relative shrink-0 cursor-pointer rounded-xl p-0.5 transition-all ${
+                  active
+                    ? 'ring-2 ring-teal-500 dark:ring-teal-400'
+                    : 'opacity-65 hover:opacity-100'
+                }`}
+              >
+                <SiteAvatar domainCore={site.domainCore} size="sm" />
+                {done && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-white shadow-xs">
+                    <Check className="h-2.5 w-2.5 stroke-[3]" />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 flex flex-col items-center rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-6 text-center dark:border-zinc-800 dark:bg-zinc-950/60">
           <SiteAvatar domainCore={currentSite.domainCore} size="lg" />
 
           <div className="mt-3.5 flex items-center gap-2">
@@ -134,6 +194,7 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">
           <TactileInput
+            ref={inputRef}
             mono
             autoComplete="off"
             spellCheck={false}
@@ -157,22 +218,22 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
               type="submit"
               className="flex-1 cursor-pointer rounded-xl bg-zinc-900 px-4 py-2.5 text-base font-medium text-zinc-50 shadow-xs transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
             >
-              {status === 'idle' ? t.save.checkBtn : t.save.nextBtn}
+              {status === 'correct' ? t.save.nextBtn : t.save.checkBtn}
             </button>
 
-            {status === 'idle' && (
+            {status !== 'correct' && (
               <button
                 type="button"
                 onClick={nextTarget}
                 className="cursor-pointer rounded-xl border border-zinc-200/90 bg-white px-4 py-2.5 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
               >
-                {t.save.nextBtn}
+                {showWrongGuide ? t.save.skipBtn : t.save.nextBtn}
               </button>
             )}
           </div>
         </form>
 
-        {status !== 'idle' && (
+        {(status === 'correct' || showWrongGuide) && (
           <div
             className={`mt-5 rounded-xl border p-4 ${
               status === 'correct'
@@ -210,8 +271,8 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
             onClick={handleDownloadPng}
             className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-base font-medium text-zinc-50 shadow-xs transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
           >
-            <Download className="h-4 w-4" />
-            <span>{t.save.downloadPng}</span>
+            {savedPng ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+            <span>{savedPng ? t.save.savedPng : t.save.downloadPng}</span>
           </button>
 
           <button

@@ -304,3 +304,15 @@ export function auditPatternSpec(spec: PatternSpec): AuditReport {
     checks,
   };
 }
+
+export function computeChecklistStatus(spec: PatternSpec) {
+  const report = auditPatternSpec(spec);
+  const findCheck = (id: string) => report.checks.find((c) => c.id === id);
+  const literalOk = findCheck('literal-leak')?.severity === 'pass';
+  const formatOk = findCheck('policy-compliance')?.severity === 'pass';
+  const coreOk = findCheck('tier3-isolation')?.severity === 'pass';
+  const prefixVaried = report.sampleDiff.sharedPrefixLen === 0;
+  const passed = [literalOk, formatOk, coreOk, prefixVaried].filter(Boolean).length;
+  const hasIssue = !literalOk || !formatOk || !coreOk;
+  return { literalOk, formatOk, coreOk, prefixVaried, passed, total: 4, hasIssue };
+}

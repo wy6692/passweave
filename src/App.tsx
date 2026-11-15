@@ -1,41 +1,27 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { AdversarialAudit } from './components/AdversarialAudit';
+import { computeChecklistStatus } from './core/auditor';
 import { BreachCascade } from './components/BreachCascade';
 import { DrillAndExport } from './components/DrillAndExport';
 import { PatternWorkbench } from './components/PatternWorkbench';
-import { TopBar, type StageId } from './components/TopBar';
-import { BLUEPRINT_PRESETS, DECOY_BUNDLES } from './core/presets';
-import { BUILTIN_SITES } from './core/sites';
-import type { AccountTier, PatternSpec, SiteEntry } from './core/types';
+import { TopBar } from './components/TopBar';
+import { usePassWeaveStore } from './hooks/usePassWeaveStore';
 import { useTheme } from './hooks/useTheme';
 import { I18nProvider, useI18n } from './i18n/I18nContext';
 
 function PassWeaveWorkspace() {
   const { theme, toggleTheme } = useTheme();
   const { t } = useI18n();
+  const store = usePassWeaveStore();
 
-  const [activeStage, setActiveStage] = useState<StageId>('design');
-  const [spec, setSpec] = useState<PatternSpec>(BLUEPRINT_PRESETS[0]!.spec);
-  const [decoyIndex, setDecoyIndex] = useState<number>(0);
-  const [sites, setSites] = useState<SiteEntry[]>(BUILTIN_SITES);
-  const [tierOverrides] = useState<Record<string, AccountTier>>({});
-
-  const handleCycleDecoy = () => {
-    const nextIdx = (decoyIndex + 1) % DECOY_BUNDLES.length;
-    const bundle = DECOY_BUNDLES[nextIdx]!;
-    setDecoyIndex(nextIdx);
-    setSpec((prev) => ({
-      ...prev,
-      tier1: { ...prev.tier1, head: bundle.tier1Head, tail: bundle.tier1Tail },
-      tier2: { ...prev.tier2, head: bundle.tier2Head, tail: bundle.tier2Tail },
-      tier3Decoy: bundle.tier3Decoy,
-    }));
-  };
-
-  const handleStageChange = (stage: StageId) => {
-    setActiveStage(stage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const checkSummary = useMemo(() => {
+    const res = computeChecklistStatus(store.spec);
+    return {
+      passed: res.passed,
+      total: res.total,
+      hasIssue: res.hasIssue,
+    };
+  }, [store.spec]);
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-clip">
@@ -46,34 +32,63 @@ function PassWeaveWorkspace() {
       />
 
       <TopBar
-        activeStage={activeStage}
-        onSelectStage={handleStageChange}
+        activeStage={store.activeStage}
+        onSelectStage={store.setActiveStage}
         theme={theme}
         onToggleTheme={toggleTheme}
+        checkSummary={checkSummary}
       />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
-        {activeStage === 'why' && (
-          <BreachCascade spec={spec} onProceed={() => handleStageChange('design')} />
-        )}
-
-        {activeStage === 'design' && (
-          <PatternWorkbench
-            spec={spec}
-            onChangeSpec={setSpec}
-            sites={sites}
-            onAddSite={(entry) => setSites((prev) => [entry, ...prev])}
-            tierOverrides={tierOverrides}
-            onCycleDecoy={handleCycleDecoy}
+        {store.activeStage === 'why' && (
+          <BreachCascade
+            spec={store.spec}
+            sites={store.sites}
+            tierOverrides={store.tierOverrides}
+            onProceed={() => store.setActiveStage('design')}
           />
         )}
 
-        {activeStage === 'check' && (
-          <AdversarialAudit spec={spec} onChangeSpec={setSpec} />
+        {store.activeStage === 'design' && (
+          <PatternWorkbench
+            spec={store.spec}
+            onChangeSpec={store.setSpec}
+            sites={store.sites}
+            selectedSiteId={store.selectedSiteId}
+            onSelectSite={store.setSelectedSiteId}
+            onAddSite={store.addOrSelectCustomSite}
+            onRemoveSite={store.removeCustomSite}
+            tierOverrides={store.tierOverrides}
+            onChangeSiteTier={store.setSiteTier}
+            onChangeSitePinyin={store.setSitePinyin}
+            privacyMask={store.privacyMask}
+            onTogglePrivacyMask={store.togglePrivacyMask}
+            onCycleDecoy={store.cycleDecoy}
+            isCustomized={store.isCustomized}
+            onResetWorkspace={store.resetWorkspace}
+            checkSummary={checkSummary}
+            onProceedCheck={() => store.setActiveStage('check')}
+          />
         )}
 
-        {activeStage === 'save' && (
-          <DrillAndExport spec={spec} sites={sites} tierOverrides={tierOverrides} />
+        {store.activeStage === 'check' && (
+          <AdversarialAudit
+            spec={store.spec}
+            onChangeSpec={store.setSpec}
+            sites={store.sites}
+            tierOverrides={store.tierOverrides}
+            onProceedSave={() => store.setActiveStage('save')}
+          />
+        )}
+
+        {store.activeStage === 'save' && (
+          <DrillAndExport
+            spec={store.spec}
+            sites={store.sites}
+            tierOverrides={store.tierOverrides}
+            bestStreak={store.bestStreak}
+            onRecordBestStreak={store.recordBestStreak}
+          />
         )}
       </main>
 

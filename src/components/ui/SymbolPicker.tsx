@@ -7,9 +7,17 @@ interface SymbolPickerProps {
   value: DelimiterChar;
   onChange: (next: DelimiterChar) => void;
   ariaLabel: string;
+  compact?: boolean;
+  align?: 'left' | 'right';
 }
 
-export function SymbolPicker({ value, onChange, ariaLabel }: SymbolPickerProps) {
+export function SymbolPicker({
+  value,
+  onChange,
+  ariaLabel,
+  compact = false,
+  align = 'left',
+}: SymbolPickerProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -32,13 +40,15 @@ export function SymbolPicker({ value, onChange, ariaLabel }: SymbolPickerProps) 
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="relative shrink-0">
       <button
         type="button"
         aria-label={ariaLabel}
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className={`inline-flex h-11 min-w-15 cursor-pointer items-center justify-between gap-2 rounded-xl border px-3 font-mono text-base font-semibold transition-all ${
+        className={`inline-flex cursor-pointer items-center justify-between rounded-xl border font-mono text-base font-semibold transition-all ${
+          compact ? 'h-10 min-w-12.5 gap-1 px-2.5' : 'h-11 min-w-15 gap-2 px-3'
+        } ${
           open
             ? 'border-teal-500 bg-white ring-3 ring-teal-500/15 dark:border-teal-400 dark:bg-zinc-900 dark:ring-teal-400/15'
             : 'border-zinc-200/90 bg-zinc-100/80 text-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] hover:border-zinc-300 hover:bg-white dark:border-zinc-700/90 dark:bg-zinc-950/90 dark:text-zinc-100 dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)] dark:hover:border-zinc-600'
@@ -53,7 +63,11 @@ export function SymbolPicker({ value, onChange, ariaLabel }: SymbolPickerProps) 
       </button>
 
       {open && (
-        <div className="surface-card absolute top-12.5 left-0 z-50 w-48 rounded-2xl border border-zinc-200 p-2 shadow-xl dark:border-zinc-700/90">
+        <div
+          className={`surface-card absolute z-50 w-48 rounded-2xl border border-zinc-200 p-2 shadow-xl dark:border-zinc-700/90 ${
+            compact ? 'top-11.5' : 'top-12.5'
+          } ${align === 'right' ? 'right-0' : 'left-0'}`}
+        >
           <div className="grid grid-cols-4 gap-1.5">
             {DELIMITER_OPTIONS.map((sym) => {
               const active = sym === value;
