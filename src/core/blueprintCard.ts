@@ -16,7 +16,12 @@ const TRANSFORM_LABEL_EN: Record<PatternSpec['transform'], string> = {
   'outer-pair': 'First + last letter (github → Gb)',
 };
 
-function buildStructureMask(spec: PatternSpec, locale: 'zh' | 'en'): string {
+interface CardChip {
+  text: string;
+  tone: 'teal' | 'amber' | 'neutral';
+}
+
+function buildMaskChips(spec: PatternSpec, locale: 'zh' | 'en'): CardChip[] {
   const head = locale === 'zh' ? '固定词' : 'Word';
   const site = locale === 'zh' ? '网站码' : 'Site';
   const s0 = locale === 'zh' ? '首码' : 'S1';
@@ -24,17 +29,33 @@ function buildStructureMask(spec: PatternSpec, locale: 'zh' | 'en'): string {
   const tail = locale === 'zh' ? '尾数' : 'Digits';
 
   if (spec.topology === 'split-inlay') {
-    return `${head}  ${spec.tier2.sepA}  ${site}  ${spec.tier2.sepB}  ${tail}`;
+    return [
+      { text: head, tone: 'teal' },
+      { text: spec.tier2.sepA, tone: 'neutral' },
+      { text: site, tone: 'amber' },
+      { text: spec.tier2.sepB, tone: 'neutral' },
+      { text: tail, tone: 'teal' },
+    ];
   }
   if (spec.topology === 'prefix-bridge') {
-    return `${site}  ${spec.tier2.sepA}  ${head}  ${spec.tier2.sepB}  ${tail}`;
+    return [
+      { text: site, tone: 'amber' },
+      { text: spec.tier2.sepA, tone: 'neutral' },
+      { text: head, tone: 'teal' },
+      { text: spec.tier2.sepB, tone: 'neutral' },
+      { text: tail, tone: 'teal' },
+    ];
   }
-  return `${s0}  ${spec.tier2.sepA}  ${head}  ${spec.tier2.sepB}  ${sRest}  ${tail}`;
+  return [
+    { text: s0, tone: 'amber' },
+    { text: spec.tier2.sepA, tone: 'neutral' },
+    { text: head, tone: 'teal' },
+    { text: spec.tier2.sepB, tone: 'neutral' },
+    { text: sRest, tone: 'amber' },
+    { text: tail, tone: 'teal' },
+  ];
 }
 
-/**
- * Exports a clean plain-text / Markdown reference note omitting private base words.
- */
 export function renderZeroSecretMarkdown(spec: PatternSpec, locale: 'zh' | 'en'): string {
   const dummySpec: PatternSpec = {
     ...spec,
@@ -47,7 +68,9 @@ export function renderZeroSecretMarkdown(spec: PatternSpec, locale: 'zh' | 'en')
     createCustomSiteEntry('github.com', 'tier2', 'gh'),
     'tier2',
   );
-  const mask = buildStructureMask(spec, locale);
+  const mask = buildMaskChips(spec, locale)
+    .map((c) => c.text)
+    .join(' ');
 
   if (locale === 'zh') {
     return [
@@ -82,18 +105,31 @@ export function renderZeroSecretMarkdown(spec: PatternSpec, locale: 'zh' | 'en')
   ].join('\n');
 }
 
-/**
- * Draws a clean, high-contrast reference card with comfortable reading sizes
- * and zero private anchor strings.
- */
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
 export function drawZeroSecretBlueprintCanvas(
   canvas: HTMLCanvasElement,
   spec: PatternSpec,
   locale: 'zh' | 'en',
 ): void {
   const scale = 2;
-  const width = 800;
-  const height = 440;
+  const width = 820;
+  const height = 460;
   canvas.width = width * scale;
   canvas.height = height * scale;
 
@@ -105,29 +141,102 @@ export function drawZeroSecretBlueprintCanvas(
   const sans = `-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif`;
   const mono = `"JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace`;
 
-  ctx.fillStyle = '#0C0C0E';
+  // Rich metallic dark background with subtle radial teal glow
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+  bgGrad.addColorStop(0, '#131419');
+  bgGrad.addColorStop(1, '#09090C');
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
+  const glow = ctx.createRadialGradient(width - 120, 80, 10, width - 120, 80, 260);
+  glow.addColorStop(0, 'rgba(20, 184, 166, 0.14)');
+  glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+
+  // Subtle dot grid
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+  for (let gx = 28; gx < width - 20; gx += 24) {
+    for (let gy = 28; gy < height - 20; gy += 24) {
+      ctx.beginPath();
+      ctx.arc(gx, gy, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // PassWeave Brand Mark top-left + Title
+  ctx.save();
+  ctx.translate(48, 36);
+  roundRect(ctx, 0, 0, 38, 38, 10);
+  ctx.fillStyle = '#09090B';
+  ctx.fill();
   ctx.strokeStyle = '#27272A';
   ctx.lineWidth = 1.5;
-  ctx.strokeRect(1, 1, width - 2, height - 2);
+  ctx.stroke();
 
-  // Title
+  ctx.strokeStyle = '#F4F4F5';
+  ctx.lineWidth = 2.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(10.5, 19, 4.8, Math.PI * 0.5, Math.PI * 1.5);
+  ctx.lineTo(20, 14.2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(27.5, 19, 4.8, -Math.PI * 0.5, Math.PI * 0.5);
+  ctx.lineTo(18, 23.8);
+  ctx.stroke();
+
+  ctx.strokeStyle = '#14B8A6';
+  ctx.beginPath();
+  ctx.arc(19, 10.5, 4.8, Math.PI, 0);
+  ctx.lineTo(23.8, 20);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(19, 27.5, 4.8, 0, Math.PI);
+  ctx.lineTo(14.2, 18);
+  ctx.stroke();
+  ctx.restore();
+
   ctx.fillStyle = '#FAFAFA';
   ctx.font = `600 22px ${sans}`;
-  ctx.fillText(locale === 'zh' ? '密码规律备忘卡' : 'Password Pattern Card', 48, 62);
+  ctx.fillText(locale === 'zh' ? 'PassWeave 规律卡' : 'PassWeave Rule Card', 100, 62);
 
-  // Structure Formula Box
-  ctx.fillStyle = '#141418';
-  ctx.fillRect(48, 90, width - 96, 84);
-  ctx.strokeStyle = '#27272A';
-  ctx.strokeRect(48, 90, width - 96, 84);
+  // Colored Keycap Chips Row
+  const chips = buildMaskChips(spec, locale);
+  let chipX = 48;
+  const chipY = 100;
+  ctx.font = `600 21px ${mono}`;
 
-  ctx.fillStyle = '#5EEAD4';
-  ctx.font = `600 26px ${mono}`;
-  ctx.fillText(buildStructureMask(spec, locale), 72, 141);
+  for (const chip of chips) {
+    const textW = ctx.measureText(chip.text).width;
+    const boxW = Math.max(46, textW + 32);
+    const boxH = 58;
 
-  // 3 clean rows
+    roundRect(ctx, chipX, chipY, boxW, boxH, 12);
+    if (chip.tone === 'teal') {
+      ctx.fillStyle = 'rgba(20, 184, 166, 0.14)';
+      ctx.strokeStyle = 'rgba(45, 212, 191, 0.42)';
+    } else if (chip.tone === 'amber') {
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.16)';
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+    } else {
+      ctx.fillStyle = 'rgba(63, 63, 70, 0.45)';
+      ctx.strokeStyle = 'rgba(113, 113, 122, 0.45)';
+    }
+    ctx.lineWidth = 1.5;
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle =
+      chip.tone === 'teal' ? '#99F6E4' : chip.tone === 'amber' ? '#FDE68A' : '#D4D4D8';
+    ctx.textAlign = 'center';
+    ctx.fillText(chip.text, chipX + boxW / 2, chipY + 36);
+    ctx.textAlign = 'left';
+
+    chipX += boxW + 12;
+  }
+
+  // Rule Rows
   const dummySpec: PatternSpec = {
     ...spec,
     tier1: { ...spec.tier1, head: 'Vault', tail: '99' },
@@ -150,7 +259,7 @@ export function drawZeroSecretBlueprintCanvas(
               : '中文首字母  (淘宝 → tb)',
           ],
           ['变形方式', TRANSFORM_LABEL_ZH[spec.transform]],
-          ['推演示例', `Sample / 00 @ github.com  →  ${demoOut.password}`],
+          ['演练示例', `Sample / 00 @ github.com  →  ${demoOut.password}`],
         ]
       : [
           [
@@ -163,7 +272,7 @@ export function drawZeroSecretBlueprintCanvas(
           ['Example', `Sample / 00 @ github.com  →  ${demoOut.password}`],
         ];
 
-  let y = 224;
+  let y = 216;
   for (const [label, value] of items) {
     ctx.fillStyle = '#71717A';
     ctx.font = `500 16px ${sans}`;
@@ -172,14 +281,14 @@ export function drawZeroSecretBlueprintCanvas(
     ctx.fillStyle = '#F4F4F5';
     ctx.font = `500 17px ${sans}`;
     ctx.fillText(value, 168, y);
-    y += 48;
+    y += 50;
   }
 
-  // Quiet divider & single-line tier note
-  ctx.strokeStyle = '#222226';
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(48, 366);
-  ctx.lineTo(width - 48, 366);
+  ctx.moveTo(48, 376);
+  ctx.lineTo(width - 48, 376);
   ctx.stroke();
 
   ctx.fillStyle = '#A1A1AA';
@@ -189,6 +298,6 @@ export function drawZeroSecretBlueprintCanvas(
       ? '重要账号换用另一组专用底词  ·  临时小网站统一用固定无关密码'
       : 'Critical accounts: separate base word  ·  Throwaway sites: unrelated password',
     48,
-    400,
+    414,
   );
 }

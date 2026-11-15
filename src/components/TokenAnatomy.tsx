@@ -1,13 +1,13 @@
 import type { SegmentRole, TokenSegment } from '../core/types';
 
 const ROLE_STYLES: Record<SegmentRole, string> = {
-  head: 'bg-teal-500/10 text-teal-800 border-teal-600/25 dark:bg-teal-400/12 dark:text-teal-200 dark:border-teal-400/25',
-  tail: 'bg-teal-500/10 text-teal-800 border-teal-600/25 dark:bg-teal-400/12 dark:text-teal-200 dark:border-teal-400/25',
-  site: 'bg-amber-500/14 text-amber-900 border-amber-600/30 dark:bg-amber-400/15 dark:text-amber-200 dark:border-amber-400/35',
+  head: 'keycap-teal border-teal-500/35 bg-gradient-to-b from-teal-500/16 to-teal-500/8 text-teal-900 dark:border-teal-400/35 dark:from-teal-400/18 dark:to-teal-500/8 dark:text-teal-200',
+  tail: 'keycap-teal border-teal-500/35 bg-gradient-to-b from-teal-500/16 to-teal-500/8 text-teal-900 dark:border-teal-400/35 dark:from-teal-400/18 dark:to-teal-500/8 dark:text-teal-200',
+  site: 'keycap-amber border-amber-500/40 bg-gradient-to-b from-amber-500/20 to-amber-500/10 text-amber-950 dark:border-amber-400/40 dark:from-amber-400/22 dark:to-amber-500/10 dark:text-amber-200',
   delimiter:
-    'bg-zinc-200/70 text-zinc-600 border-zinc-300/80 dark:bg-zinc-800/90 dark:text-zinc-400 dark:border-zinc-700',
+    'keycap-neutral border-zinc-300/90 bg-gradient-to-b from-white to-zinc-100 text-zinc-600 dark:border-zinc-700 dark:from-zinc-800 dark:to-zinc-900 dark:text-zinc-300',
   decoy:
-    'bg-zinc-200/70 text-zinc-800 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700',
+    'keycap-neutral border-zinc-300/90 bg-gradient-to-b from-white to-zinc-100 text-zinc-800 dark:border-zinc-700 dark:from-zinc-800 dark:to-zinc-900 dark:text-zinc-200',
 };
 
 interface TokenAnatomyProps {
@@ -17,12 +17,14 @@ interface TokenAnatomyProps {
 
 export function TokenAnatomy({ segments, size = 'lg' }: TokenAnatomyProps) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-2">
       {segments.map((seg, idx) => (
         <span
           key={`${seg.role}-${idx}`}
-          className={`inline-flex items-center justify-center rounded-lg border font-mono font-semibold tracking-tight ${
-            size === 'sm' ? 'px-2.5 py-1 text-base' : 'px-3.5 py-2 text-2xl sm:text-3xl'
+          className={`inline-flex items-center justify-center rounded-xl border font-mono font-semibold tracking-tight select-all ${
+            size === 'sm'
+              ? 'px-3 py-1.5 text-base'
+              : 'min-w-11 px-4 py-2.5 text-2xl sm:text-3xl'
           } ${ROLE_STYLES[seg.role]}`}
         >
           {seg.value}

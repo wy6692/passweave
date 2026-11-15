@@ -26,6 +26,11 @@ export const zhMessages: Messages = {
     ctaDesign: '定制我的密码规律',
   },
   design: {
+    presets: {
+      'balanced-inlay': '均衡夹心',
+      'hardened-weave': '双点拆嵌',
+      'pinyin-shift': '中文顺移',
+    },
     copy: '复制',
     copied: '已复制',
     fixedWord: '固定词',

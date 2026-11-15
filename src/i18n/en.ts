@@ -26,6 +26,11 @@ export const enMessages: Messages = {
     ctaDesign: 'Design my pattern',
   },
   design: {
+    presets: {
+      'balanced-inlay': 'Balanced',
+      'hardened-weave': 'Split Weave',
+      'pinyin-shift': 'Phonetic +1',
+    },
     copy: 'Copy',
     copied: 'Copied',
     fixedWord: 'Base word',

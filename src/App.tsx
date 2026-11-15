@@ -38,7 +38,13 @@ function PassWeaveWorkspace() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col overflow-x-clip">
+      {/* Subtle atmospheric top lighting */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-96 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(20,184,166,0.10),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(20,184,166,0.12),transparent)]"
+      />
+
       <TopBar
         activeStage={activeStage}
         onSelectStage={handleStageChange}

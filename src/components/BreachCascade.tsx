@@ -1,9 +1,11 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import { BUILTIN_SITES } from '../core/sites';
 import type { PatternSpec } from '../core/types';
 import { weavePassword } from '../core/weaver';
 import { useI18n } from '../i18n/I18nContext';
+import { BreachTopologyIllustration } from './visuals/BreachTopologyIllustration';
+import { SiteAvatar } from './visuals/SiteAvatar';
 
 type ModeKey = 'reuse' | 'suffix' | 'weave';
 
@@ -42,9 +44,9 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
   const modes: ModeKey[] = ['reuse', 'suffix', 'weave'];
 
   return (
-    <section className="space-y-8">
-      {/* Mode Switcher */}
-      <div className="grid grid-cols-1 gap-2 rounded-2xl border border-zinc-200 bg-zinc-100/80 p-1.5 sm:grid-cols-3 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="space-y-6">
+      {/* Segmented Mode Control */}
+      <div className="grid grid-cols-1 gap-2 rounded-2xl border border-zinc-200/90 bg-zinc-100/90 p-1.5 sm:grid-cols-3 dark:border-zinc-800 dark:bg-zinc-900">
         {modes.map((key) => {
           const active = mode === key;
           return (
@@ -54,7 +56,7 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
               onClick={() => setMode(key)}
               className={`cursor-pointer rounded-xl px-4 py-3 text-base font-medium transition-all ${
                 active
-                  ? 'bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50'
+                  ? 'bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-zinc-50'
                   : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
               }`}
             >
@@ -64,20 +66,35 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
         })}
       </div>
 
-      {/* Cause -> Effect Layout */}
+      {/* Interactive Network Topology SVG Illustration */}
+      <BreachTopologyIllustration
+        mode={mode}
+        leakedPassword={leakedPassword}
+        targetLabels={targets.map((s) => (locale === 'zh' ? s.nameZh : s.nameEn))}
+      />
+
+      {/* Cause -> Effect Cards with Brand Avatars */}
       <div className="grid items-stretch gap-6 md:grid-cols-12">
         {/* Left: Breach Source */}
-        <div className="flex flex-col justify-between rounded-2xl border border-amber-500/35 bg-amber-500/[0.04] p-6 md:col-span-5 dark:border-amber-400/25 dark:bg-amber-400/[0.04]">
+        <div className="surface-card flex flex-col justify-between rounded-2xl border border-amber-500/35 p-6 md:col-span-5 dark:border-amber-400/25">
           <div className="space-y-4">
-            <div className="text-base font-medium text-zinc-900 dark:text-zinc-100">
-              {t.why.breachBoxTitle}
+            <div className="flex items-center gap-3">
+              <SiteAvatar domainCore={forum.domainCore} size="md" />
+              <div>
+                <div className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                  {t.why.breachBoxTitle}
+                </div>
+                <div className="font-mono text-sm text-zinc-500 dark:text-zinc-400">
+                  {t.why.breachSite}
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-xl border border-zinc-200/90 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-              <div className="font-mono text-sm text-zinc-500 dark:text-zinc-400">
-                {t.why.breachSite}
+            <div className="rounded-xl border border-zinc-200/90 bg-zinc-100/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/90">
+              <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                {t.why.leakedLabel}
               </div>
-              <div className="mt-2 font-mono text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              <div className="mt-1.5 font-mono text-xl font-semibold text-amber-800 dark:text-amber-300">
                 {leakedPassword}
               </div>
             </div>
@@ -88,13 +105,13 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
           </p>
         </div>
 
-        {/* Right: Other Accounts */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 md:col-span-7 dark:border-zinc-800 dark:bg-zinc-900/70">
-          <div className="mb-4 text-base font-medium text-zinc-900 dark:text-zinc-100">
+        {/* Right: Other Accounts with App Squircle Icons */}
+        <div className="surface-card rounded-2xl border border-zinc-200/90 p-6 md:col-span-7 dark:border-zinc-800">
+          <div className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-100">
             {t.why.accountsTitle}
           </div>
 
-          <div className="divide-y divide-zinc-200/70 dark:divide-zinc-800">
+          <div className="divide-y divide-zinc-200/70 dark:divide-zinc-800/80">
             {targets.map((site) => {
               const name = locale === 'zh' ? site.nameZh : site.nameEn;
               const password =
@@ -115,24 +132,28 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
               return (
                 <div
                   key={site.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3.5"
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
                 >
-                  <span className="min-w-28 text-base font-medium text-zinc-900 dark:text-zinc-100">
-                    {name}
-                  </span>
+                  <div className="flex min-w-36 items-center gap-3">
+                    <SiteAvatar domainCore={site.domainCore} size="sm" />
+                    <span className="text-base font-medium text-zinc-900 dark:text-zinc-100">
+                      {name}
+                    </span>
+                  </div>
 
                   <span className="font-mono text-base text-zinc-600 dark:text-zinc-300">
                     {password}
                   </span>
 
                   <span
-                    className={`rounded-lg px-2.5 py-1 text-sm font-medium ${
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-medium ${
                       safe
                         ? 'bg-teal-500/12 text-teal-800 dark:bg-teal-400/12 dark:text-teal-300'
                         : 'bg-rose-500/12 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300'
                     }`}
                   >
-                    {statusLabel}
+                    {safe ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
+                    <span>{statusLabel}</span>
                   </span>
                 </div>
               );
@@ -145,7 +166,7 @@ export function BreachCascade({ spec, onProceed }: BreachCascadeProps) {
         <button
           type="button"
           onClick={onProceed}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-base font-medium text-zinc-50 transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-base font-medium text-zinc-50 shadow-sm transition-all hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
         >
           <span>{t.why.ctaDesign}</span>
           <ArrowRight className="h-4 w-4" />

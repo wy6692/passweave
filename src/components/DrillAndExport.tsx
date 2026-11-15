@@ -1,4 +1,4 @@
-import { Check, Copy, Download } from 'lucide-react';
+import { Check, Copy, CornerDownLeft, Download, KeyRound } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   drawZeroSecretBlueprintCanvas,
@@ -8,6 +8,8 @@ import type { AccountTier, PatternSpec, SiteEntry } from '../core/types';
 import { weavePassword } from '../core/weaver';
 import { useI18n } from '../i18n/I18nContext';
 import { TokenAnatomy } from './TokenAnatomy';
+import { TactileInput } from './ui/TactileInput';
+import { SiteAvatar } from './visuals/SiteAvatar';
 
 interface DrillAndExportProps {
   spec: PatternSpec;
@@ -82,16 +84,16 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
 
   return (
     <section className="grid items-start gap-6 lg:grid-cols-12">
-      {/* Left: Recall Test */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-7 lg:col-span-5 dark:border-zinc-800 dark:bg-zinc-900/80">
+      {/* Left: App-Unlock Style Recall Test */}
+      <div className="surface-card rounded-2xl border border-zinc-200/90 p-6 sm:p-7 lg:col-span-5 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-base font-medium text-zinc-900 dark:text-zinc-100">
+          <span className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
             {t.save.practiceTitle}
           </span>
 
           <div className="flex items-center gap-3">
             {streak > 0 && (
-              <span className="rounded-md bg-teal-500/12 px-2.5 py-0.5 font-mono text-sm font-medium text-teal-800 dark:text-teal-300">
+              <span className="rounded-lg bg-teal-500/12 px-2.5 py-0.5 font-mono text-sm font-medium text-teal-800 dark:text-teal-300">
                 {t.save.streak} {streak}
               </span>
             )}
@@ -99,7 +101,7 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
               <button
                 type="button"
                 onClick={() => setShowHint((prev) => !prev)}
-                className="cursor-pointer text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="cursor-pointer text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
               >
                 {showHint ? t.save.hideHintBtn : t.save.hintBtn}
               </button>
@@ -107,44 +109,53 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
           </div>
         </div>
 
-        <div className="mt-6 rounded-xl border border-zinc-200/90 bg-zinc-50/70 p-5 dark:border-zinc-800 dark:bg-zinc-950/60">
-          <div className="flex items-center justify-between gap-2">
+        <div className="mt-6 flex flex-col items-center rounded-2xl border border-zinc-200/80 bg-zinc-50/70 p-6 text-center dark:border-zinc-800 dark:bg-zinc-950/60">
+          <SiteAvatar domainCore={currentSite.domainCore} size="lg" />
+
+          <div className="mt-3.5 flex items-center gap-2">
             <span className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
               {locale === 'zh' ? currentSite.nameZh : currentSite.nameEn}
             </span>
-            <span className="rounded-md bg-zinc-200/70 px-2.5 py-0.5 text-sm font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+            <span className="rounded-md bg-zinc-200/80 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
               {t.tiers[currentTier]}
             </span>
           </div>
+
           <div className="mt-1 font-mono text-sm text-zinc-500 dark:text-zinc-400">
             {currentSite.url}
           </div>
 
           {showHint && currentTier !== 'tier3' && (
-            <div className="mt-3 border-t border-zinc-200 pt-3 font-mono text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
+            <div className="mt-3.5 rounded-lg bg-amber-500/12 px-3 py-1 font-mono text-sm font-medium text-amber-800 dark:text-amber-300">
               {expected.anchorWord} → {expected.siteToken}
             </div>
           )}
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-3">
-          <input
-            type="text"
+          <TactileInput
+            mono
             autoComplete="off"
             spellCheck={false}
+            leading={<KeyRound className="h-4 w-4" />}
+            trailing={
+              <kbd className="inline-flex h-6 items-center rounded-md border border-zinc-300/80 bg-white px-1.5 font-mono text-xs text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500">
+                <CornerDownLeft className="h-3 w-3" />
+              </kbd>
+            }
             value={answer}
             onChange={(e) => {
               setAnswer(e.target.value);
               if (status !== 'idle') setStatus('idle');
             }}
             placeholder={t.save.inputPlaceholder}
-            className="w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 font-mono text-lg text-zinc-900 placeholder:font-sans placeholder:text-sm placeholder:text-zinc-400 focus:border-teal-600 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-teal-400"
+            containerClassName="h-12"
           />
 
           <div className="flex items-center gap-2.5">
             <button
               type="submit"
-              className="flex-1 cursor-pointer rounded-xl bg-zinc-900 px-4 py-2.5 text-base font-medium text-zinc-50 transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
+              className="flex-1 cursor-pointer rounded-xl bg-zinc-900 px-4 py-2.5 text-base font-medium text-zinc-50 shadow-xs transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
             >
               {status === 'idle' ? t.save.checkBtn : t.save.nextBtn}
             </button>
@@ -153,7 +164,7 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
               <button
                 type="button"
                 onClick={nextTarget}
-                className="cursor-pointer rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-base font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="cursor-pointer rounded-xl border border-zinc-200/90 bg-white px-4 py-2.5 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
               >
                 {t.save.nextBtn}
               </button>
@@ -183,13 +194,13 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
         )}
       </div>
 
-      {/* Right: Clean Reference Card */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-7 lg:col-span-7 dark:border-zinc-800 dark:bg-zinc-900/80">
-        <div className="text-base font-medium text-zinc-900 dark:text-zinc-100">
+      {/* Right: Metallic Visual Reference Card */}
+      <div className="surface-card rounded-2xl border border-zinc-200/90 p-6 sm:p-7 lg:col-span-7 dark:border-zinc-800">
+        <div className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
           {t.save.cardTitle}
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+        <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-lg">
           <canvas ref={canvasRef} className="block h-auto w-full" />
         </div>
 
@@ -197,7 +208,7 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
           <button
             type="button"
             onClick={handleDownloadPng}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-base font-medium text-zinc-50 transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-base font-medium text-zinc-50 shadow-xs transition-colors hover:bg-zinc-800 dark:bg-teal-500 dark:text-zinc-950 dark:hover:bg-teal-400"
           >
             <Download className="h-4 w-4" />
             <span>{t.save.downloadPng}</span>
@@ -206,7 +217,7 @@ export function DrillAndExport({ spec, sites, tierOverrides }: DrillAndExportPro
           <button
             type="button"
             onClick={handleCopyText}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-base font-medium text-zinc-800 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-200/90 bg-white px-4 py-2.5 text-base font-medium text-zinc-800 shadow-2xs transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
           >
             {copiedText ? (
               <Check className="h-4 w-4 text-teal-500" />

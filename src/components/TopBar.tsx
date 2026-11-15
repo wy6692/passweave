@@ -28,20 +28,23 @@ export function TopBar({
   ];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-200/80 bg-zinc-50/90 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/90">
+    <header className="sticky top-0 z-30 border-b border-zinc-200/80 bg-white/80 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/80">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
         <button
           type="button"
           onClick={() => onSelectStage('design')}
           className="flex cursor-pointer items-center gap-2.5"
         >
-          <BrandMark className="h-7 w-7 shrink-0" />
-          <span className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <BrandMark className="h-8 w-8 shrink-0 shadow-xs" />
+          <span className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
             PassWeave
           </span>
         </button>
 
-        <nav aria-label="Primary" className="hidden items-center gap-1 sm:flex">
+        <nav
+          aria-label="Primary"
+          className="hidden items-center gap-1 rounded-xl border border-zinc-200/90 bg-zinc-100/85 p-1 sm:flex dark:border-zinc-800 dark:bg-zinc-900/90"
+        >
           {stages.map((stage) => {
             const active = activeStage === stage.id;
             return (
@@ -49,10 +52,10 @@ export function TopBar({
                 key={stage.id}
                 type="button"
                 onClick={() => onSelectStage(stage.id)}
-                className={`cursor-pointer rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                className={`cursor-pointer rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${
                   active
-                    ? 'bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'text-zinc-600 hover:bg-zinc-200/60 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100'
+                    ? 'bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50'
+                    : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
                 }`}
               >
                 {stage.label}
@@ -65,7 +68,7 @@ export function TopBar({
           <button
             type="button"
             onClick={toggleLocale}
-            className="cursor-pointer rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="cursor-pointer rounded-xl border border-zinc-200/90 bg-white px-3.5 py-1.5 text-sm font-medium text-zinc-700 shadow-2xs transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             {locale === 'zh' ? 'EN' : '中文'}
           </button>
@@ -74,7 +77,7 @@ export function TopBar({
             type="button"
             onClick={onToggleTheme}
             aria-label="Toggle theme"
-            className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-zinc-200 bg-white p-2 text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-zinc-200/90 bg-white p-2 text-zinc-700 shadow-2xs transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -83,7 +86,7 @@ export function TopBar({
 
       {/* Mobile Navigation */}
       <div className="flex border-t border-zinc-200/70 px-4 py-2 sm:hidden dark:border-zinc-800/70">
-        <div className="grid w-full grid-cols-4 gap-1">
+        <div className="grid w-full grid-cols-4 gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-900">
           {stages.map((stage) => {
             const active = activeStage === stage.id;
             return (
@@ -91,9 +94,9 @@ export function TopBar({
                 key={stage.id}
                 type="button"
                 onClick={() => onSelectStage(stage.id)}
-                className={`cursor-pointer rounded-md py-1.5 text-center text-sm font-medium ${
+                className={`cursor-pointer rounded-lg py-1.5 text-center text-sm font-medium ${
                   active
-                    ? 'bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900'
+                    ? 'bg-white text-zinc-950 shadow-2xs dark:bg-zinc-800 dark:text-zinc-50'
                     : 'text-zinc-600 dark:text-zinc-400'
                 }`}
               >

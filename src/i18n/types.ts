@@ -26,6 +26,11 @@ export interface Messages {
     ctaDesign: string;
   };
   design: {
+    presets: {
+      'balanced-inlay': string;
+      'hardened-weave': string;
+      'pinyin-shift': string;
+    };
     copy: string;
     copied: string;
     fixedWord: string;
