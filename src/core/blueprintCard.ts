@@ -1,87 +1,90 @@
 import { createCustomSiteEntry } from './sites';
-import { TOPOLOGY_CATALOG, weavePassword } from './weaver';
-import { TRANSFORM_CATALOG } from './transforms';
 import type { PatternSpec } from './types';
+import { weavePassword } from './weaver';
+
+const TRANSFORM_LABEL_ZH: Record<PatternSpec['transform'], string> = {
+  'consonant-count': '前两辅音 + 元音数（github → Gt2）',
+  'edge-length': '首尾字母 + 长度（github → G6b）',
+  'caesar-pair': '前两字母后移一位（github → Hj）',
+  'outer-pair': '首尾两字母（github → Gb）',
+};
+
+const TRANSFORM_LABEL_EN: Record<PatternSpec['transform'], string> = {
+  'consonant-count': '2 consonants + vowel count (github → Gt2)',
+  'edge-length': 'First + length + last (github → G6b)',
+  'caesar-pair': 'First 2 letters shifted +1 (github → Hj)',
+  'outer-pair': 'First + last letter (github → Gb)',
+};
+
+function buildStructureMask(spec: PatternSpec, locale: 'zh' | 'en'): string {
+  const head = locale === 'zh' ? '固定词' : 'Word';
+  const site = locale === 'zh' ? '网站码' : 'Site';
+  const s0 = locale === 'zh' ? '首码' : 'S1';
+  const sRest = locale === 'zh' ? '余码' : 'S2';
+  const tail = locale === 'zh' ? '尾数' : 'Digits';
+
+  if (spec.topology === 'split-inlay') {
+    return `${head}  ${spec.tier2.sepA}  ${site}  ${spec.tier2.sepB}  ${tail}`;
+  }
+  if (spec.topology === 'prefix-bridge') {
+    return `${site}  ${spec.tier2.sepA}  ${head}  ${spec.tier2.sepB}  ${tail}`;
+  }
+  return `${s0}  ${spec.tier2.sepA}  ${head}  ${spec.tier2.sepB}  ${sRest}  ${tail}`;
+}
 
 /**
- * Builds a zero-secret Markdown reference sheet using placeholder tokens
- * (`<CORE_HEAD>`, `<DAILY_HEAD>`) and a synthetic `Sample` / `example.com` walkthrough
- * so the exported file never contains the user's real secret anchor.
+ * Exports a clean plain-text / Markdown reference note omitting private base words.
  */
 export function renderZeroSecretMarkdown(spec: PatternSpec, locale: 'zh' | 'en'): string {
-  const transformMeta =
-    TRANSFORM_CATALOG.find((t) => t.id === spec.transform) ?? TRANSFORM_CATALOG[0]!;
-  const topologyMeta =
-    TOPOLOGY_CATALOG.find((t) => t.id === spec.topology) ?? TOPOLOGY_CATALOG[0]!;
-
   const dummySpec: PatternSpec = {
     ...spec,
-    tier1: { ...spec.tier1, head: 'VaultWord', tail: '99' },
-    tier2: { ...spec.tier2, head: 'SampleWord', tail: '00' },
-    tier3Decoy: '<STATIC_DECOY_PASSWORD>',
+    tier1: { ...spec.tier1, head: 'Vault', tail: '99' },
+    tier2: { ...spec.tier2, head: 'Sample', tail: '00' },
+    tier3Decoy: '<FIXED_PASSWORD>',
   };
-  const demoSite = createCustomSiteEntry('example.com', 'tier2', 'sl');
-  const demoOut = weavePassword(dummySpec, demoSite, 'tier2');
-
-  const structuralMask =
-    spec.topology === 'split-inlay'
-      ? `<HEAD>${spec.tier2.sepA}[SITE_TOKEN]${spec.tier2.sepB}<TAIL>`
-      : spec.topology === 'prefix-bridge'
-        ? `[SITE_TOKEN]${spec.tier2.sepA}<HEAD>${spec.tier2.sepB}<TAIL>`
-        : `[SITE_0]${spec.tier2.sepA}<HEAD>${spec.tier2.sepB}[SITE_REST]<TAIL>`;
+  const demoOut = weavePassword(
+    dummySpec,
+    createCustomSiteEntry('github.com', 'tier2', 'gh'),
+    'tier2',
+  );
+  const mask = buildStructureMask(spec, locale);
 
   if (locale === 'zh') {
     return [
-      '# PassWeave 个人密码规律助记卡（零敏感脱敏版）',
+      '# 密码规律备忘',
       '',
-      '> 安全说明：本卡片仅记录「规律结构与算法步骤」，不含你的真实暗语词根，可安全存档于备忘录或打印保存。',
+      `结构：\`${mask}\``,
       '',
-      '## 1. 核心编织结构',
-      `- **平台定名锚点**：${spec.naming === 'domain' ? '主域名核心词（如 `github.com` → `github`）' : '中文名双字拼音首字母（如 `淘宝` → `tb`）'}`,
-      `- **特征编码规则**：${transformMeta.nameZh} — ${transformMeta.summaryZh}`,
-      `- **穿插拓扑结构**：${topologyMeta.nameZh}（\`${structuralMask}\`）`,
-      `- **定界符配置**：日常级 \`${spec.tier2.sepA}\` / \`${spec.tier2.sepB}\` · 核心级 \`${spec.tier1.sepA}\` / \`${spec.tier1.sepB}\``,
+      `- 网站取名：${spec.naming === 'domain' ? '网址主词（github.com → github）' : '中文首字母（淘宝 → tb）'}`,
+      `- 变形方式：${TRANSFORM_LABEL_ZH[spec.transform]}`,
+      `- 示例（假定底词 Sample / 00，网站 github.com）：\`${demoOut.password}\``,
       '',
-      '## 2. 演练示例（以虚构词 `SampleWord` / `00` 登录 `example.com` 为例）',
-      `1. 锁定名称：\`${demoOut.anchorWord}\``,
-      `2. 特征编码：\`${demoOut.siteToken}\``,
-      `3. 合成结果：\`${demoOut.password}\`（使用时将 \`SampleWord\` 与 \`00\` 替换为你脑海中的真实暗语）`,
-      '',
-      '## 3. 账号三级隔离准则',
-      '- **Tier 1 核心级（主邮箱 / 银行 / 支付 / 密码库）**：使用独立 `<CORE_HEAD>` + `<CORE_TAIL>`，必须开启 2FA。',
-      '- **Tier 2 日常级（常用社交 / 购物 / 开发平台）**：套用上方标准编织公式。',
-      '- **Tier 3 抛弃级（小论坛 / 临时下载站）**：统一使用与个人暗语完全无关的固定一次性口令。',
+      '分级习惯：',
+      '- 重要账号（邮箱 / 支付）：换用另一组专用底词，并开启双重验证',
+      '- 临时小站：统一用固定无关密码，不用上述规律',
       '',
     ].join('\n');
   }
 
   return [
-    '# PassWeave Mental Pattern Reference Card (Zero-Secret)',
+    '# Password Pattern Note',
     '',
-    '> Privacy Note: This sheet records only your structural grammar and public dummy examples. Your personal anchor words are omitted.',
+    `Structure: \`${mask}\``,
     '',
-    '## 1. Pattern Grammar',
-    `- **Site Naming Anchor**: ${spec.naming === 'domain' ? 'Registrable domain core (`github.com` → `github`)' : 'Two-syllable phonetic initials (`Taobao` → `tb`)'}`,
-    `- **Site Token Transform**: ${transformMeta.nameEn} — ${transformMeta.summaryEn}`,
-    `- **Weave Topology**: ${topologyMeta.nameEn} (\`${structuralMask}\`)`,
-    `- **Delimiters**: Tier 2 \`${spec.tier2.sepA}\` / \`${spec.tier2.sepB}\` · Tier 1 \`${spec.tier1.sepA}\` / \`${spec.tier1.sepB}\``,
+    `- Site name: ${spec.naming === 'domain' ? 'Domain word (github.com → github)' : '2-letter code (Taobao → tb)'}`,
+    `- Transform: ${TRANSFORM_LABEL_EN[spec.transform]}`,
+    `- Example ("Sample" / "00" on github.com): \`${demoOut.password}\``,
     '',
-    '## 2. Worked Dummy Example (`SampleWord` / `00` on `example.com`)',
-    `1. Canonical Name: \`${demoOut.anchorWord}\``,
-    `2. Derived Token: \`${demoOut.siteToken}\``,
-    `3. Assembled Output: \`${demoOut.password}\` (mentally substitute your private anchor for \`SampleWord\` & \`00\`)`,
-    '',
-    '## 3. Three-Tier Isolation Protocol',
-    '- **Tier 1 — Core Vault (Primary Email, Banking, Cloud Root)**: Dedicated `<CORE_HEAD>` + `<CORE_TAIL>` + mandatory 2FA.',
-    '- **Tier 2 — Standard Everyday**: Standard woven pattern above.',
-    '- **Tier 3 — Disposable / Untrusted**: Unrelated static decoy credential; never apply Tier 1/2 rules.',
+    'Tiers:',
+    '- Critical accounts: separate base word + 2FA',
+    '- Throwaway sites: single unrelated password',
     '',
   ].join('\n');
 }
 
 /**
- * Renders a high-DPI (2x) Swiss-grid typographic reference card onto an HTMLCanvasElement
- * with zero secret material for offline PNG export.
+ * Draws a clean, high-contrast reference card with comfortable reading sizes
+ * and zero private anchor strings.
  */
 export function drawZeroSecretBlueprintCanvas(
   canvas: HTMLCanvasElement,
@@ -89,8 +92,8 @@ export function drawZeroSecretBlueprintCanvas(
   locale: 'zh' | 'en',
 ): void {
   const scale = 2;
-  const width = 880;
-  const height = 520;
+  const width = 800;
+  const height = 440;
   canvas.width = width * scale;
   canvas.height = height * scale;
 
@@ -99,154 +102,93 @@ export function drawZeroSecretBlueprintCanvas(
 
   ctx.scale(scale, scale);
 
-  const sans = `-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif`;
-  const mono = `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+  const sans = `-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif`;
+  const mono = `"JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace`;
 
-  // Background & frame
-  ctx.fillStyle = '#09090B';
+  ctx.fillStyle = '#0C0C0E';
   ctx.fillRect(0, 0, width, height);
 
   ctx.strokeStyle = '#27272A';
   ctx.lineWidth = 1.5;
-  ctx.strokeRect(20, 20, width - 40, height - 40);
+  ctx.strokeRect(1, 1, width - 2, height - 2);
 
-  // Header band
-  ctx.fillStyle = '#111113';
-  ctx.fillRect(21, 21, width - 42, 68);
-  ctx.beginPath();
-  ctx.moveTo(20, 89);
-  ctx.lineTo(width - 20, 89);
-  ctx.stroke();
-
-  // Accent indicator
-  ctx.fillStyle = '#14B8A6';
-  ctx.fillRect(44, 43, 10, 24);
-
+  // Title
   ctx.fillStyle = '#FAFAFA';
-  ctx.font = `700 20px ${sans}`;
-  ctx.fillText(
-    locale === 'zh' ? 'PassWeave · 零敏感规律助记卡' : 'PassWeave · Zero-Secret Pattern Blueprint',
-    66,
-    61,
-  );
+  ctx.font = `600 22px ${sans}`;
+  ctx.fillText(locale === 'zh' ? '密码规律备忘卡' : 'Password Pattern Card', 48, 62);
 
-  ctx.fillStyle = '#14B8A6';
-  ctx.font = `600 11px ${mono}`;
-  ctx.textAlign = 'right';
-  ctx.fillText('ZERO SECRET MATERIAL · SAFE TO ARCHIVE', width - 44, 59);
-  ctx.textAlign = 'left';
-
-  const transformMeta =
-    TRANSFORM_CATALOG.find((t) => t.id === spec.transform) ?? TRANSFORM_CATALOG[0]!;
-  const topologyMeta =
-    TOPOLOGY_CATALOG.find((t) => t.id === spec.topology) ?? TOPOLOGY_CATALOG[0]!;
-
-  const structuralMask =
-    spec.topology === 'split-inlay'
-      ? `<HEAD>  ${spec.tier2.sepA}  [SITE]  ${spec.tier2.sepB}  <TAIL>`
-      : spec.topology === 'prefix-bridge'
-        ? `[SITE]  ${spec.tier2.sepA}  <HEAD>  ${spec.tier2.sepB}  <TAIL>`
-        : `[SITE_0]  ${spec.tier2.sepA}  <HEAD>  ${spec.tier2.sepB}  [SITE_1..]  <TAIL>`;
-
-  // Formula box
-  ctx.fillStyle = '#141417';
-  ctx.fillRect(44, 112, width - 88, 86);
+  // Structure Formula Box
+  ctx.fillStyle = '#141418';
+  ctx.fillRect(48, 90, width - 96, 84);
   ctx.strokeStyle = '#27272A';
-  ctx.strokeRect(44, 112, width - 88, 86);
-
-  ctx.fillStyle = '#71717A';
-  ctx.font = `600 11px ${mono}`;
-  ctx.fillText(
-    locale === 'zh' ? 'GRAMMAR TEMPLATE / 编织结构掩码' : 'GRAMMAR TEMPLATE',
-    64,
-    136,
-  );
+  ctx.strokeRect(48, 90, width - 96, 84);
 
   ctx.fillStyle = '#5EEAD4';
-  ctx.font = `700 22px ${mono}`;
-  ctx.fillText(structuralMask, 64, 174);
+  ctx.font = `600 26px ${mono}`;
+  ctx.fillText(buildStructureMask(spec, locale), 72, 141);
 
-  // Two-column spec details
-  const rows: Array<[string, string]> =
-    locale === 'zh'
-      ? [
-          [
-            '01 平台定名锚点',
-            spec.naming === 'domain'
-              ? '取主域名核心词 (github.com → github)'
-              : '取中文名双字拼音首字母 (淘宝 → tb)',
-          ],
-          ['02 特征提取积木', `${transformMeta.nameZh} (${transformMeta.exampleInput} → ${transformMeta.exampleOutput})`],
-          ['03 穿插拓扑模式', `${topologyMeta.nameZh} · 日常定界符 [ ${spec.tier2.sepA} ] 与 [ ${spec.tier2.sepB} ]`],
-        ]
-      : [
-          [
-            '01 NAMING ANCHOR',
-            spec.naming === 'domain'
-              ? 'Registrable domain core (github.com → github)'
-              : 'Two-syllable phonetic initials (Taobao → tb)',
-          ],
-          ['02 SITE TRANSFORM', `${transformMeta.nameEn} (${transformMeta.exampleInput} → ${transformMeta.exampleOutput})`],
-          ['03 WEAVE TOPOLOGY', `${topologyMeta.nameEn} · Delimiters [ ${spec.tier2.sepA} ] & [ ${spec.tier2.sepB} ]`],
-        ];
-
-  let y = 234;
-  for (const [label, val] of rows) {
-    ctx.fillStyle = '#A1A1AA';
-    ctx.font = `600 12px ${mono}`;
-    ctx.fillText(label, 44, y);
-
-    ctx.fillStyle = '#F4F4F5';
-    ctx.font = `500 14px ${sans}`;
-    ctx.fillText(val, 230, y);
-
-    ctx.strokeStyle = '#1F1F23';
-    ctx.beginPath();
-    ctx.moveTo(44, y + 16);
-    ctx.lineTo(width - 44, y + 16);
-    ctx.stroke();
-    y += 44;
-  }
-
-  // Dummy example & 3-tier footer
+  // 3 clean rows
   const dummySpec: PatternSpec = {
     ...spec,
     tier1: { ...spec.tier1, head: 'Vault', tail: '99' },
     tier2: { ...spec.tier2, head: 'Sample', tail: '00' },
-    tier3Decoy: 'Decoy',
+    tier3Decoy: 'Fixed',
   };
   const demoOut = weavePassword(
     dummySpec,
-    createCustomSiteEntry('example.com', 'tier2', 'ex'),
+    createCustomSiteEntry('github.com', 'tier2', 'gh'),
     'tier2',
   );
 
-  ctx.fillStyle = '#111113';
-  ctx.fillRect(44, 372, width - 88, 102);
-  ctx.strokeStyle = '#27272A';
-  ctx.strokeRect(44, 372, width - 88, 102);
-
-  ctx.fillStyle = '#FBBF24';
-  ctx.font = `600 12px ${mono}`;
-  ctx.fillText(
+  const items: Array<[string, string]> =
     locale === 'zh'
-      ? `虚构词演练 (Sample / 00 @ example.com)  →  ${demoOut.password}`
-      : `DUMMY WALKTHROUGH (Sample / 00 @ example.com)  →  ${demoOut.password}`,
-    64,
-    402,
-  );
+      ? [
+          [
+            '网站取名',
+            spec.naming === 'domain'
+              ? '网址主词  (github.com → github)'
+              : '中文首字母  (淘宝 → tb)',
+          ],
+          ['变形方式', TRANSFORM_LABEL_ZH[spec.transform]],
+          ['推演示例', `Sample / 00 @ github.com  →  ${demoOut.password}`],
+        ]
+      : [
+          [
+            'Site name',
+            spec.naming === 'domain'
+              ? 'Domain word  (github.com → github)'
+              : '2-letter code  (Taobao → tb)',
+          ],
+          ['Transform', TRANSFORM_LABEL_EN[spec.transform]],
+          ['Example', `Sample / 00 @ github.com  →  ${demoOut.password}`],
+        ];
+
+  let y = 224;
+  for (const [label, value] of items) {
+    ctx.fillStyle = '#71717A';
+    ctx.font = `500 16px ${sans}`;
+    ctx.fillText(label, 48, y);
+
+    ctx.fillStyle = '#F4F4F5';
+    ctx.font = `500 17px ${sans}`;
+    ctx.fillText(value, 168, y);
+    y += 48;
+  }
+
+  // Quiet divider & single-line tier note
+  ctx.strokeStyle = '#222226';
+  ctx.beginPath();
+  ctx.moveTo(48, 366);
+  ctx.lineTo(width - 48, 366);
+  ctx.stroke();
 
   ctx.fillStyle = '#A1A1AA';
-  ctx.font = `400 12.5px ${sans}`;
+  ctx.font = `400 15px ${sans}`;
   ctx.fillText(
     locale === 'zh'
-      ? 'Tier 1 核心资产：独立暗语 + 2FA   |   Tier 2 日常主力：套用本卡公式   |   Tier 3 临时小站：固定无关一次性口令'
-      : 'Tier 1 Core: Dedicated Anchor + 2FA  |  Tier 2 Daily: Standard Weave  |  Tier 3 Untrusted: Unrelated Static Decoy',
-    64,
-    434,
+      ? '重要账号换用另一组专用底词  ·  临时小网站统一用固定无关密码'
+      : 'Critical accounts: separate base word  ·  Throwaway sites: unrelated password',
+    48,
+    400,
   );
-
-  ctx.fillStyle = '#52525B';
-  ctx.font = `500 11px ${mono}`;
-  ctx.fillText('Generated locally by PassWeave (offline CSP-locked runtime)', 64, 458);
 }
