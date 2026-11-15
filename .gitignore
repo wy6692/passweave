@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+.pnpm-debug.log*
+
+# Build output
+dist/
+dist-ssr/
+coverage/
+
+# Local env & editor artifacts
+*.local
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
