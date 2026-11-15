@@ -11,8 +11,7 @@
   </p>
 
   <p align="center">
-    <a href="https://github.com/wy6692/passweave/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/wy6692/passweave/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white" alt="CI Status" /></a>
-    <a href="https://github.com/wy6692/passweave/actions/workflows/deploy.yml"><img src="https://img.shields.io/github/actions/workflow/status/wy6692/passweave/deploy.yml?branch=main&label=Pages&logo=githubpages&logoColor=white" alt="GitHub Pages" /></a>
+    <a href="https://github.com/wy6692/passweave/actions/workflows/ci.yml"><img src="https://github.com/wy6692/passweave/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI Status" /></a>
     <a href="./SECURITY.md"><img src="https://img.shields.io/badge/CSP-connect--src_%27none%27-0D9488" alt="Strict Offline CSP" /></a>
     <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-3F3F46" alt="MIT License" /></a>
   </p>
