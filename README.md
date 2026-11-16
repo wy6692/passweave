@@ -26,7 +26,7 @@
   </p>
 
   <p align="center">
-    <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a> · <a href="https://wy6692.github.io/passweave/">Live Demo</a> · <a href="./SECURITY.md">Security Policy</a> · <a href="./CONTRIBUTING.md">Contributing</a>
+    <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a> · <a href="https://passweave.gazeo887.workers.dev/">Live Demo</a> · <a href="./SECURITY.md">Security Policy</a> · <a href="./CONTRIBUTING.md">Contributing</a>
   </p>
 </div>
 
@@ -106,6 +106,12 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+```
+
+Deploy the static bundle to Cloudflare Workers via Wrangler (run `pnpm cf:login` once for local authentication):
+
+```bash
+pnpm cf:deploy
 ```
 
 ## Security & Scope

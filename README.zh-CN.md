@@ -26,7 +26,7 @@
   </p>
 
   <p align="center">
-    <a href="./README.md">English</a> · <strong>简体中文</strong> · <a href="https://wy6692.github.io/passweave/">在线预览</a> · <a href="./SECURITY.md">安全策略</a> · <a href="./CONTRIBUTING.md">参与贡献</a>
+    <a href="./README.md">English</a> · <strong>简体中文</strong> · <a href="https://passweave.gazeo887.workers.dev/">在线预览</a> · <a href="./SECURITY.md">安全策略</a> · <a href="./CONTRIBUTING.md">参与贡献</a>
   </p>
 </div>
 
@@ -106,6 +106,12 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+```
+
+通过 Wrangler 发布静态构建产物至 Cloudflare Workers（本地首次发布先执行 `pnpm cf:login`）：
+
+```bash
+pnpm cf:deploy
 ```
 
 ## 适用边界与安全说明

@@ -6,9 +6,11 @@ node_modules/
 dist/
 dist-ssr/
 coverage/
+.wrangler/
 
 # Local env & editor artifacts
 *.local
+.dev.vars*
 .DS_Store
 Thumbs.db
 .vscode/*

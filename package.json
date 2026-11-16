@@ -16,7 +16,7 @@
     "typescript",
     "tailwindcss"
   ],
-  "homepage": "https://wy6692.github.io/passweave/",
+  "homepage": "https://passweave.gazeo887.workers.dev/",
   "bugs": {
     "url": "https://github.com/wy6692/passweave/issues"
   },
@@ -33,7 +33,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "cf:login": "wrangler login",
+    "cf:deploy": "node scripts/deploy.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.475.0",
@@ -54,6 +56,7 @@
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.25.0",
     "vite": "^6.2.0",
-    "vitest": "^3.0.7"
+    "vitest": "^3.0.7",
+    "wrangler": "^4.162.0"
   }
 }
